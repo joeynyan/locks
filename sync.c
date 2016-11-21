@@ -61,22 +61,30 @@ int my_spinlock_trylock(my_spinlock_t *lock)
 
 int my_mutex_init(my_mutex_t *lock)
 {
+	lock->status = 0;
 }
 
 int my_mutex_destroy(my_mutex_t *lock)
 {
+	return 0;
 }
 
 int my_mutex_unlock(my_mutex_t *lock)
 {
+	lock->status = 0;
 }
 
 int my_mutex_lock(my_mutex_t *lock)
 {
+	while(tas(&lock->status) != 0) {
+		//nanosleep usleep
+	}
+	return 0;
 }
 
 int my_mutex_trylock(my_mutex_t *lock)
 {
+	return lock->status;
 }
 
 /*

@@ -11,6 +11,7 @@
 
 struct my_mutex_struct {
 	volatile long unsigned int status;
+	int backoff;
 	int value;
 };
 
@@ -47,6 +48,7 @@ int my_spinlock_trylock(my_spinlock_t *lock);
 
 struct my_queuelock_struct {
 	// fill me in
+	volatile long unsigned int status;
 };
 
 typedef struct my_queuelock my_queuelock_t;

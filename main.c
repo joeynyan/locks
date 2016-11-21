@@ -107,6 +107,29 @@ void *mySpinLockTTAS()
 	}
 }
 
+my_mutex_t myMutex;
+void *myMutexTAS()
+{
+	int i;
+	int j;
+	int k;
+	int localCount = 0;
+	for(i = 0; i < numItterations; i++)
+	{
+		for(j = 0; j < workOutsideCS; j++)
+		{
+			localCount++;
+		}
+
+		my_mutex_lock(&myMutex);
+		for(k = 0; k < workInsideCS; k++)
+		{
+			c++;
+		}
+		my_mutex_unlock(&myMutex);
+	}
+}
+
 
 int runTest(int testID)
 {
@@ -256,6 +279,37 @@ if(testID == 0 || testID == 4) /*MySpinLockTTAS*/
 if(testID == 0 || testID == 5) /*MyMutexTAS*/
 {
 	//myMutex TAS
+	my_mutex_init(&myMutex);
+	//printf("Starting spinlock\n");
+	c = 0;
+	struct timespec start;
+	struct timespec stop;
+	unsigned long long result; //64 bit int
+
+	pthread_t *threads = (pthread_t*)malloc(sizeof(pthread_t)*numThreads);
+	int i;
+	int rt;
+
+	clock_gettime(CLOCK_MONOTONIC, &start);
+	for( i = 0; i < numThreads; i++)
+	{
+
+		if( rt=(pthread_create(threads+i, NULL, &myMutexTAS, NULL)) )
+		{
+			printf("Thread creation failed: %d\n", rt);
+			return -1;
+		}
+
+	}
+	for( i = 0; i < numThreads; i++) // wait for all threads to finish
+	{
+		pthread_join(threads[i], NULL);
+	}
+	clock_gettime(CLOCK_MONOTONIC, &stop);
+
+	printf("Threaded Run myMutexTAS  (Spin) Total Count: %llu\n", c);
+	result = timespecDiff(&stop, &start);
+	printf("myMutexTAS time(ms): %lld\n", result/1000000);
 }
 
 if(testID == 0 || testID == 6) /*MyQueueLock*/
@@ -319,7 +373,7 @@ int main(int argc, char *argv[])
 	printf("Usage of: %s -t #threads -i #Itterations -o #OperationsOutsideCS -c #OperationsInsideCS -d testid\n", argv[0]);
 	printf("testid: 0=all, 1=pthreadMutex, 2=pthreadSpinlock, 3=mySpinLockTAS, 4=mySpinLockTTAS, 5=myMutexTAS, 6=myQueueLock, \n");
 
-	testAndSetExample(); //Uncomment this line to see how to use TAS
+	// testAndSetExample(); //Uncomment this line to see how to use TAS
 
 	processInput(argc,argv);
 	runTest(testID);
