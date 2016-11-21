@@ -14,6 +14,9 @@ int workInsideCS;
 int testID;
 pthread_mutex_t count_mutex;
 pthread_spinlock_t count_spin;
+my_spinlock_t mySpin;
+my_mutex_t myMutex;
+my_queuelock_t myQueue;
 
 
 unsigned long long timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)

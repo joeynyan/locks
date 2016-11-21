@@ -8,9 +8,11 @@
 #define _m_SYNC_H_
 
 #include "atomic_ops.h"
+#include <stdlib.h>
 
 struct my_mutex_struct {
 	volatile long unsigned int status;
+	struct timespec wait;
 	int backoff;
 	int value;
 };
@@ -45,10 +47,12 @@ int my_spinlock_trylock(my_spinlock_t *lock);
 
 
 /* queuelock starts here */
-
+int serving = 0;
+int nextTicket = 0;
 struct my_queuelock_struct {
 	// fill me in
 	volatile long unsigned int status;
+	int myTicket;
 };
 
 typedef struct my_queuelock my_queuelock_t;
