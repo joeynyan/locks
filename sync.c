@@ -32,7 +32,7 @@ int my_spinlock_unlock(my_spinlock_t *lock)
 int my_spinlock_lockTAS(my_spinlock_t *lock)
 {
 	//keep trying til you get the lock
-	while(tas(&lock->status!=0){}
+	while(tas(&lock->status)!=0){}
 	return 0;
 }
 
@@ -51,6 +51,7 @@ int my_spinlock_lockTTAS(my_spinlock_t *lock)
 
 int my_spinlock_trylock(my_spinlock_t *lock)
 {
+	return lock->status;
 }
 
 
@@ -101,5 +102,3 @@ int my_queuelock_lock(my_queuelock_t *lock)
 int my_queuelock_trylock(my_queuelock_t *lock)
 {
 }
-
-

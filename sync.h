@@ -10,14 +10,9 @@
 #include "atomic_ops.h"
 
 struct my_mutex_struct {
-	volatile int test;
+	volatile long unsigned int status;
 	int value;
-		
-// fill me in
 };
-
-
-
 
 typedef struct my_mutex_struct my_mutex_t;
 
@@ -29,12 +24,10 @@ int my_mutex_destroy(my_mutex_t *lock);
 int my_mutex_lock(my_mutex_t *lock);
 int my_mutex_trylock(my_mutex_t *lock);
 
-
-
 /* Spinlock starts here */
 
 struct my_spinlock_struct {
-	volatile int status;
+	volatile long unsigned int status;
 	int value;
 	// fill me in
 };
