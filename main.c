@@ -130,39 +130,39 @@ void *myMutexTAS()
 	}
 }
 
-// my_queuelock_t myQueue;
-// void *myQueueTAS()
-// {
-// 	int i;
-// 	int j;
-// 	int k;
-// 	int localCount = 0;
-// 	for(i = 0; i < numItterations; i++)
-// 	{
-// 		for(j = 0; j < workOutsideCS; j++)
-// 		{
-// 			localCount++;
-// 		}
-//
-// 		my_queuelock_lock(&myQueue);
-// 		for(k = 0; k < workInsideCS; k++)
-// 		{
-// 			c++;
-// 		}
-// 		my_queuelock_unlock(&myQueue);
-// 	}
-// }
+my_queuelock_t myQueue;
+void *myQueueTAS()
+{
+	int i;
+	int j;
+	int k;
+	int localCount = 0;
+	for(i = 0; i < numItterations; i++)
+	{
+		for(j = 0; j < workOutsideCS; j++)
+		{
+			localCount++;
+		}
+
+		my_queuelock_lock(&myQueue);
+		for(k = 0; k < workInsideCS; k++)
+		{
+			c++;
+		}
+		my_queuelock_unlock(&myQueue);
+	}
+}
 
 void* multilock() {
-	my_spinlock_lockTAS(&mySpin);
+	my_spinlock_lockTTAS(&mySpin);
 	printf("lock\n");
-	my_spinlock_lockTAS(&mySpin);
+	my_spinlock_lockTTAS(&mySpin);
 	printf("lock\n");
-	my_spinlock_lockTAS(&mySpin);
+	my_spinlock_lockTTAS(&mySpin);
 	printf("lock\n");
-	my_spinlock_lockTAS(&mySpin);
+	my_spinlock_lockTTAS(&mySpin);
 	printf("lock\n");
-	my_spinlock_lockTAS(&mySpin);
+	my_spinlock_lockTTAS(&mySpin);
 	printf("lock\n");
 
 	my_spinlock_unlock(&mySpin);
@@ -361,37 +361,37 @@ if(testID == 0 || testID == 5) /*MyMutexTAS*/
 if(testID == 0 || testID == 6) /*MyQueueLock*/
 {
 	//myqueuelock
-	// my_queuelock_init(&myQueue);
-	//
-	// c = 0;
-	// struct timespec start;
-	// struct timespec stop;
-	// unsigned long long result; //64 bit int
-	//
-	// pthread_t *threads = (pthread_t*)malloc(sizeof(pthread_t)*numThreads);
-	// int i;
-	// int rt;
-	//
-	// clock_gettime(CLOCK_MONOTONIC, &start);
-	// for( i = 0; i < numThreads; i++)
-	// {
-	//
-	// 	if( rt=(pthread_create(threads+i, NULL, &myQueueTAS, NULL)) )
-	// 	{
-	// 		printf("Thread creation failed: %d\n", rt);
-	// 		return -1;
-	// 	}
-	//
-	// }
-	// for( i = 0; i < numThreads; i++) // wait for all threads to finish
-	// {
-	// 	pthread_join(threads[i], NULL);
-	// }
-	// clock_gettime(CLOCK_MONOTONIC, &stop);
-	//
-	// printf("Threaded Run myQueueTAS  (Spin) Total Count: %llu\n", c);
-	// result = timespecDiff(&stop, &start);
-	// printf("myQueueTAS time(ms): %lld\n", result/1000000);
+	my_queuelock_init(&myQueue);
+
+	c = 0;
+	struct timespec start;
+	struct timespec stop;
+	unsigned long long result; //64 bit int
+
+	pthread_t *threads = (pthread_t*)malloc(sizeof(pthread_t)*numThreads);
+	int i;
+	int rt;
+
+	clock_gettime(CLOCK_MONOTONIC, &start);
+	for( i = 0; i < numThreads; i++)
+	{
+
+		if( rt=(pthread_create(threads+i, NULL, &myQueueTAS, NULL)) )
+		{
+			printf("Thread creation failed: %d\n", rt);
+			return -1;
+		}
+
+	}
+	for( i = 0; i < numThreads; i++) // wait for all threads to finish
+	{
+		pthread_join(threads[i], NULL);
+	}
+	clock_gettime(CLOCK_MONOTONIC, &stop);
+
+	printf("Threaded Run myQueueTAS  (Spin) Total Count: %llu\n", c);
+	result = timespecDiff(&stop, &start);
+	printf("myQueueTAS time(ms): %lld\n", result/1000000);
 }
 
 	return 0;
