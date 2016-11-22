@@ -9,12 +9,17 @@
 
 #include "atomic_ops.h"
 #include <stdlib.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
 
 struct my_mutex_struct {
 	volatile long unsigned int status;
 	struct timespec wait;
 	int backoff;
-	int value;
+	pid_t threadID;
+	int timesLocked;
+	// int value;
 };
 
 typedef struct my_mutex_struct my_mutex_t;
@@ -31,7 +36,9 @@ int my_mutex_trylock(my_mutex_t *lock);
 
 struct my_spinlock_struct {
 	volatile long unsigned int status;
-	int value;
+	// int value;
+	pid_t threadID;
+	int timesLocked;
 	// fill me in
 };
 
@@ -47,12 +54,10 @@ int my_spinlock_trylock(my_spinlock_t *lock);
 
 
 /* queuelock starts here */
-int serving = 0;
-int nextTicket = 0;
+
 struct my_queuelock_struct {
 	// fill me in
 	volatile long unsigned int status;
-	int myTicket;
 };
 
 typedef struct my_queuelock my_queuelock_t;

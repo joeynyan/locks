@@ -16,11 +16,11 @@ pthread_mutex_t count_mutex;
 pthread_spinlock_t count_spin;
 my_spinlock_t mySpin;
 my_mutex_t myMutex;
-my_queuelock_t myQueue;
+// my_queuelock_t myQueue;
 
 
 unsigned long long timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
 {
-	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) - 
+	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
 		((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
 }
