@@ -360,7 +360,7 @@ if(testID == 0 || testID == 5) /*MyMutexTAS*/
 
 if(testID == 0 || testID == 6) /*MyQueueLock*/
 {
-	//myqueuelock
+	// myqueuelock
 	my_queuelock_init(&myQueue);
 
 	c = 0;
@@ -405,12 +405,30 @@ int testAndSetExample()
 	printf("Test after atomic OP:%ld\n", test);
 }
 
+int casTest()
+{
+	volatile long test = 15;
+	long temp = 15;
+	printf("Test: %ld\n", test);
+	// while(cas(&test, temp, test+1) != test+1){}
+	temp = cas(&test, temp, test+1);
+	printf("temp: %ld\n", temp);
+	printf("test: %ld\n", test);
+
+}
+
 int processInput(int argc, char *argv[])
 {
 
 /*testid: 0=all, 1=pthreadMutex, 2=pthreadSpinlock, 3=mySpinLockTAS, 4=mySpinLockTTAS, 5=myMutexTAS, 6=myQueueLock*/
 	/*You must write how to parse input from the command line here, your software should default to the values given below if no input is given*/
 
+	numThreads=4;
+	numItterations=1000000;
+	testID=0;
+	workOutsideCS=0;
+	workInsideCS=1;
+	
 	if ( argc > 2) {
 		int i = 0;
 		for (i = 1; i < argc; i+=2) {
@@ -431,13 +449,14 @@ int processInput(int argc, char *argv[])
 				printf("testID set to: %d\n", testID);
 			}
 		}
-	} else {
-		numThreads=4;
-		numItterations=1000000;
-		testID=0;
-		workOutsideCS=0;
-		workInsideCS=1;
-	}
+	} 
+	// else {
+	// 	numThreads=4;
+	// 	numItterations=1000000;
+	// 	testID=0;
+	// 	workOutsideCS=0;
+	// 	workInsideCS=1;
+	// }
 
 	return 0;
 }
@@ -451,7 +470,7 @@ int main(int argc, char *argv[])
 	printf("testid: 0=all, 1=pthreadMutex, 2=pthreadSpinlock, 3=mySpinLockTAS, 4=mySpinLockTTAS, 5=myMutexTAS, 6=myQueueLock, \n");
 
 	// testAndSetExample(); //Uncomment this line to see how to use TAS
-
+	// casTest(); // testing usage of CAS
 	processInput(argc,argv);
 	runTest(testID);
 	return 0;

@@ -150,16 +150,8 @@ int my_queuelock_init(my_queuelock_t *lock)
 {
 	lock->ticket = 0;
 	lock->nowServing = 0;
-	// lock->status = 0;
-	// while(tas(&lock->status)!= 0){}
-	// lock->myTicket = ticket;
-	// ticket++;
-	// lock->status = 0;
-	// while(cas(&ticket, lock->myTicket, (ticket+1)) != 0) {
-	// 	lock->myTicket = ticket;
-	// 	printf("myTicket = %ld\n", lock->myTicket);
-	// 	printf("ticket = %ld\n", ticket);
-	// }
+	lock->timesLocked = 0;
+	lock->threadID = -5;
 }
 
 int my_queuelock_destroy(my_queuelock_t *lock)
@@ -169,28 +161,36 @@ int my_queuelock_destroy(my_queuelock_t *lock)
 
 int my_queuelock_unlock(my_queuelock_t *lock)
 {
-	lock->nowServing = lock->nowServing+1;
-	printf("unlocked %lu\n", lock->nowServing);
-	// return 0;
+	if (lock->threadID == syscall(SYS_gettid)) {
+		lock->timesLocked--;
+		if (lock->timesLocked == 0) {
+			lock->threadID = -5;
+			lock->nowServing = lock->nowServing+1;
+		}
+	}
 }
 
 int my_queuelock_lock(my_queuelock_t *lock)
 {
-	int myTicket = lock->ticket;
-	while(cas(&lock->ticket, myTicket, (lock->ticket+1)) != lock->ticket){
-		myTicket = lock->ticket;
+	if(my_queuelock_trylock(lock) == 1) {
+		lock->timesLocked++;
+	} else {
+		int myTicket = lock->ticket;
+		while(cas(&lock->ticket, myTicket, (lock->ticket+1)) != myTicket){
+			myTicket = lock->ticket;
+		}
+		while(lock->nowServing != myTicket){}
+		lock->threadID = syscall(SYS_gettid);
+		lock->timesLocked++;
 	}
-	printf("acquired ticket %d, %ld\n", myTicket, lock->ticket);
-	while(cas(&lock->nowServing, myTicket, lock->nowServing) != lock->nowServing) {}
-	printf("locked\n");
-	// while(cas(&nowServing, lock->myTicket, nowServing) == 0) {
-	// 	printf("nowServing = %ld\n", nowServing);
-	// 	printf("myticket= %ld\n", lock->myTicket);
-	// }
 	return 0;
 }
 
 int my_queuelock_trylock(my_queuelock_t *lock)
 {
-	// return lock->status;
+	if (lock->threadID == syscall(SYS_gettid)) {
+		return 1;
+	} else {
+		return 0;
+	}
 }

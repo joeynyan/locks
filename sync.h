@@ -53,14 +53,11 @@ int my_spinlock_trylock(my_spinlock_t *lock);
 
 
 /* queuelock starts here */
-// int nowServing = 0;
-// int ticket = 0;
 struct my_queuelock_struct {
-	// volatile long unsigned int myTicket;
-	// volatile long unsigned int status;
 	volatile long unsigned int ticket;
 	volatile long unsigned int nowServing;
-	// int myTicket;
+	pid_t threadID;
+	int timesLocked;
 };
 
 typedef struct my_queuelock_struct my_queuelock_t;
